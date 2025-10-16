@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İnteraktif Veritabanı Çalışma Rehberi | Ünite 1</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: Bu SPA, kullanıcıların Ünite 1'deki temel veritabanı kavramlarını etkileşimli bir şekilde keşfetmelerini sağlamak için tasarlanmıştır. Yapı, dikey bir gezinme akışına sahiptir ve üstte sabit bir gezinme çubuğu ile bölümler arasında kolay geçiş sağlar. Bu yapı, kullanıcının konudan konuya doğrusal olarak ilerlemesine veya ilgilendiği belirli bir alana doğrudan atlamasına olanak tanıdığı için seçilmiştir. Etkileşimler arasında tıklanabilir kartlar, karşılaştırmalı listeler ve görsel bir zaman çizelgesi bulunur. Bu, pasif okuma yerine aktif öğrenmeyi teşvik ederek karmaşık bilgilerin daha kolay sindirilmesini amaçlamaktadır. -->
+    <!-- Visualization & Content Choices: 
+        - Temel Kavramlar: Bilgilendirme amacıyla, her terim için tıklanınca tanımını gösteren interaktif kartlar kullanıldı. Bu yöntem, bilgiyi küçük ve yönetilebilir parçalara ayırır (HTML/JS).
+        - Dosya Sistemi vs. DBMS: Karşılaştırma hedefiyle, bir soruna tıklandığında ilgili DBMS çözümünü vurgulayan yan yana iki sütunlu bir düzen oluşturuldu. Bu, neden-sonuç ilişkisini görsel olarak güçlendirir (HTML/JS).
+        - Roller: Bilgiyi düzenlemek amacıyla, her rol için tıklandığında detayları gösteren sekmeli bir yapı tasarlandı. Bu, yoğun metni temiz bir arayüzde sunar (HTML/JS).
+        - Tarihsel Gelişim: Değişimi göstermek için, DBMS nesillerinin dönemlerini görselleştiren bir çubuk grafik ve ana olayları gösteren dikey bir zaman çizelgesi kullanıldı. Grafik, zaman içindeki hakimiyeti gösterirken, zaman çizelgesi önemli anları vurgular (Chart.js + HTML/JS).
+        - Avantajlar/Dezavantajlar: Bilgilendirme hedefiyle, her madde için genişletilebilir akordeon panelleri kullanıldı. Bu, kullanıcı arayüzünü temiz tutar ve bilgi yüklemesini önler (HTML/JS).
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF8; /* Warm Off-White */
+            color: #3f3f46; /* Warm Dark Gray */
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #2563eb; /* Accent Blue */
+            border-bottom-color: #2563eb;
+        }
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #D1D5DB;
+            border: 4px solid #FDFBF8;
+        }
+        .timeline-item:hover::before {
+            background-color: #2563eb;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-3">
+            <div class="flex items-center justify-between">
+                <h1 class="text-xl font-bold text-gray-800">Veritabanı Rehberi: Ünite 1</h1>
+                <div class="hidden md:flex space-x-6">
+                    <a href="#concepts" class="nav-link">Kavramlar</a>
+                    <a href="#comparison" class="nav-link">Karşılaştırma</a>
+                    <a href="#roles" class="nav-link">Roller</a>
+                    <a href="#history" class="nav-link">Tarihçe</a>
+                    <a href="#pros-cons" class="nav-link">Artılar/Eksiler</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+        
+        <!-- Section: Core Concepts -->
+        <section id="concepts" class="mb-20 scroll-mt-24">
+            <h2 class="text-3xl font-bold text-center mb-2 text-gray-800">I. Temel Kavramlar ve Tanımlar</h2>
+            <p class="text-center text-gray-500 mb-10">Her bir kartın üzerine tıklayarak Türkçe ve İngilizce detaylı tanımlarını görüntüleyin.</p>
+            <div id="concepts-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Cards will be injected by JavaScript -->
+            </div>
+        </section>
+        
+        <!-- Section: File-Based vs DBMS -->
+        <section id="comparison" class="mb-20 scroll-mt-24">
+            <h2 class="text-3xl font-bold text-center mb-2 text-gray-800">II. Dosya Tabanlı Sistem vs. DBMS Yaklaşımı</h2>
+            <p class="text-center text-gray-500 mb-10">Soldaki bir probleme tıklayarak sağdaki ilgili DBMS çözümünü vurgulayın.</p>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-red-600">Geleneksel Dosya Sisteminin Sınırlamaları</h3>
+                    <ul id="file-system-problems" class="space-y-3">
+                        <!-- Problems will be injected by JavaScript -->
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-green-600">Veritabanı Yaklaşımının Avantajları</h3>
+                     <ul id="dbms-solutions" class="space-y-3">
+                        <!-- Solutions will be injected by JavaScript -->
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Roles -->
+        <section id="roles" class="mb-20 scroll-mt-24">
+            <h2 class="text-3xl font-bold text-center mb-2 text-gray-800">V. DBMS Ortamındaki Roller</h2>
+            <p class="text-center text-gray-500 mb-10">Aşağıdaki rollerden birini seçerek detaylı görev tanımını görüntüleyin.</p>
+            <div class="flex flex-wrap justify-center gap-2 mb-8" id="role-tabs">
+                <!-- Role tabs will be injected by JavaScript -->
+            </div>
+            <div id="role-content" class="bg-white p-6 rounded-lg shadow-md min-h-[200px] flex items-center justify-center">
+                 <!-- Role content will be injected by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Section: History -->
+        <section id="history" class="mb-20 scroll-mt-24">
+            <h2 class="text-3xl font-bold text-center mb-2 text-gray-800">VI. Veritabanı Teknolojisinin Tarihsel Gelişimi</h2>
+            <p class="text-center text-gray-500 mb-10">Grafik, DBMS nesillerinin hakimiyet dönemlerini, zaman çizelgesi ise önemli kilometre taşlarını göstermektedir.</p>
+            <div class="bg-white p-6 rounded-lg shadow-md mb-12">
+                 <div class="chart-container relative w-full max-w-3xl mx-auto h-80 md:h-96">
+                    <canvas id="historyChart"></canvas>
+                </div>
+            </div>
+            <div id="timeline" class="relative border-l-2 border-gray-200 ml-8 md:ml-12">
+                <!-- Timeline items will be injected by JavaScript -->
+            </div>
+        </section>
+        
+        <!-- Section: Pros and Cons -->
+        <section id="pros-cons" class="scroll-mt-24">
+            <h2 class="text-3xl font-bold text-center mb-2 text-gray-800">III & IV. DBMS Kullanımının Artıları ve Eksileri</h2>
+            <p class="text-center text-gray-500 mb-10">Her bir başlığa tıklayarak ilgili avantaj veya dezavantajın açıklamasını okuyun.</p>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-center">Avantajlar (Advantages)</h3>
+                    <div id="advantages-accordion" class="space-y-2">
+                        <!-- Advantages will be injected here -->
+                    </div>
+                </div>
+                 <div>
+                    <h3 class="text-xl font-semibold mb-4 text-center">Dezavantajlar (Disadvantages)</h3>
+                    <div id="disadvantages-accordion" class="space-y-2">
+                        <!-- Disadvantages will be injected here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- DATA ---
+            const conceptsData = [
+                { term: "Database (DB)", desc: "Mantıksal olarak ilişkili verilerin (**logically related data**) ve bu verilerin açıklamasının **paylaşılan koleksiyonu** (**shared collection**), bir kuruluşun bilgi ihtiyaçlarını karşılamak üzere tasarlanmıştır." },
+                { term: "DBMS", desc: "Kullanıcıların veritabanını **tanımlamasını (define), oluşturmasını (create), sürdürmesini (maintain)** ve **erişimi kontrol etmesini (control access)** sağlayan bir yazılım sistemi (**software system**)." },
+                { term: "Metadata / System Catalog", desc: "Verinin açıklamasıdır (**data about data**). Veri tanımlarının uygulama programlarından ayrı ve bağımsız olarak saklandığı yerdir." },
+                { term: "Program–Data Independence", desc: "Veri tanımının uygulamalardan ayrılması sayesinde, veri yapısındaki değişikliklerin ilgili olmayan uygulamaları etkilememesi. DBMS'in temel avantajlarından biridir." },
+                { term: "Data Definition Language (DDL)", desc: "Veri tiplerini, yapılarını ve veriler üzerindeki **kısıtlamaları (constraints)** belirtmek için kullanılır." },
+                { term: "Data Manipulation Language (DML)", desc: "Veritabanından veri **eklemek (insert), güncellemek (update), silmek (delete)** ve **almak (retrieve)** için kullanılır." },
+            ];
+            
+            const comparisonData = [
+                { problem: "Data Redundancy / Duplication", solution: "Control of Data Redundancy", id: 0 },
+                { problem: "Data Inconsistency", solution: "Data Consistency", id: 1 },
+                { problem: "Program–Data Dependence", solution: "Improved Maintenance through Data Independence", id: 2 },
+                { problem: "Separation and Isolation of Data", solution: "Sharing of Data", id: 3 },
+                { problem: "Fixed Queries / No Ad Hoc", solution: "Improved Data Accessibility and Responsiveness", id: 4 }
+            ];
+
+            const rolesData = [
+                { role: "Data Administrator (DA)", desc: "**Veri kaynağının yönetiminden** sorumlu. Stratejik planlama, standartlar, politikalar ve **kavramsal/mantıksal veritabanı tasarımı**." },
+                { role: "Database Administrator (DBA)", desc: "Veritabanının **fiziksel gerçekleştirilmesinden** sorumlu. Güvenlik, bütünlük kontrolü, operasyonel bakım ve **performans izleme**." },
+                { role: "Logical Database Designer", desc: "Varlıkları (Entities), öznitelikleri (Attributes), ilişkileri (Relationships) ve **iş kurallarını (Business Rules)** tanımlar. **DBMS'ten bağımsız** çalışır." },
+                { role: "Physical Database Designer", desc: "Mantıksal tasarımı fiziksel olarak uygular. Depolama yapılarını (Storage Structures) ve erişim yöntemlerini seçer. **Hedef DBMS'e bağımlıdır**." },
+                { role: "Naïve End-Users", desc: "DBMS'den haberdar değildir. Önceden yazılmış **hazır uygulamalar (canned transactions)** kullanır (Örn: Banka gişe görevlileri)." },
+                { role: "Sophisticated End-Users", desc: "Veritabanı yapısına aşinadır. İşlemler için **SQL gibi yüksek düzeyli sorgu dillerini** kullanır (Örn: İş Analistleri, Bilim İnsanları)." }
+            ];
+
+            const timelineData = [
+                { year: "Mid-1960s", event: "First Generation (Birinci Nesil)", desc: "Hierarchical (IMS) ve Network (CODASYL) modelleri ortaya çıktı. Veri bağımsızlığı zayıftı." },
+                { year: "1970", event: "Relational Model (İlişkisel Model)", desc: "E. F. Codd, ilişkisel modeli önererek İkinci Nesil'in temelini attı." },
+                { year: "1970-1980s", event: "Second Generation (İkinci Nesil)", desc: "SQL dili geliştirildi. Oracle, DB2 gibi ticari RDBMS'ler yaygınlaştı." },
+                { year: "Late 1980s - 1990s", event: "Third Generation (Üçüncü Nesil)", desc: "Object-Oriented (OODBMS) ve Object-Relational (ORDBMS) sistemler karmaşık veri ihtiyaçları için geliştirildi." },
+                { year: "21st Century", event: "Extending Capabilities (Kapasite Genişletme)", desc: "Big Data, NoSQL, Data Warehousing ve Web entegrasyonu gibi teknolojiler ortaya çıktı." }
+            ];
+
+            const prosConsData = {
+                advantages: [
+                    { title: "Control of Data Redundancy", content: "Tekrarlamayı minimuma indirir ve kontrol altında tutar." },
+                    { title: "Data Consistency", content: "Veri tekrarlılığının azaltılmasıyla tutarsızlık riski düşer." },
+                    { title: "Improved Data Integrity", content: "Verinin geçerliliği ve tutarlılığı, DBMS tarafından uygulanan kısıtlamalar (integrity constraints) ile sağlanır." },
+                    { title: "Improved Security", content: "DBA tarafından tanımlanan kullanıcı adları ve şifreler ile yetkisiz erişim engellenir." },
+                    { title: "Sharing of Data", content: "Veritabanı, tüm organizasyona ait paylaşılan bir kaynak haline gelir." },
+                ],
+                disadvantages: [
+                    { title: "Complexity", content: "İyi bir DBMS çok karmaşık bir yazılımdır; tasarımcılar ve kullanıcılar tüm işlevselliği anlamak zorundadır." },
+                    { title: "Cost of DBMSs and Hardware", content: "Lisans ve ek donanım gereksinimleri yüksek maliyetlidir." },
+                    { title: "Cost of Conversion", content: "Eski sistemlerden (Legacy Systems) geçiş maliyetleri (uygulama ve personel eğitimi) oldukça yüksektir." },
+                    { title: "Performance", content: "DBMS'in genel amaçlı yapısı nedeniyle, bazı özel uygulamalar eski dosya tabanlı sistemlere göre daha yavaş çalışabilir." },
+                    { title: "Greater Impact of a Failure", content: "Merkezileşme nedeniyle, merkezi bir bileşenin arızalanması tüm operasyonları durdurabilir." },
+                ]
+            };
+
+
+            // --- RENDER FUNCTIONS ---
+
+            // 1. Concepts
+            const conceptsGrid = document.getElementById('concepts-grid');
+            conceptsData.forEach(concept => {
+                const card = document.createElement('div');
+                card.className = 'card bg-white p-6 rounded-lg shadow-md';
+                card.innerHTML = `
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">${concept.term}</h3>
+                    <p class="text-gray-600 text-sm hidden">${concept.desc}</p>
+                `;
+                card.addEventListener('click', () => {
+                    card.querySelector('p').classList.toggle('hidden');
+                });
+                conceptsGrid.appendChild(card);
+            });
+            
+            // 2. Comparison
+            const problemsList = document.getElementById('file-system-problems');
+            const solutionsList = document.getElementById('dbms-solutions');
+            comparisonData.forEach(item => {
+                const problemItem = document.createElement('li');
+                problemItem.className = 'p-3 bg-red-50 border border-red-200 rounded-md cursor-pointer transition-all duration-300';
+                problemItem.textContent = item.problem;
+                problemItem.dataset.id = item.id;
+                problemsList.appendChild(problemItem);
+
+                const solutionItem = document.createElement('li');
+                solutionItem.className = 'p-3 bg-green-50 border border-green-200 rounded-md transition-all duration-300';
+                solutionItem.textContent = item.solution;
+                solutionItem.dataset.id = item.id;
+                solutionsList.appendChild(solutionItem);
+            });
+            
+            problemsList.addEventListener('click', (e) => {
+                if (e.target.tagName === 'LI') {
+                    const id = e.target.dataset.id;
+                    const solutionItem = solutionsList.querySelector(`li[data-id='${id}']`);
+                    
+                    document.querySelectorAll('#file-system-problems li, #dbms-solutions li').forEach(li => {
+                        li.style.backgroundColor = '';
+                        li.style.transform = '';
+                    });
+                    
+                    e.target.style.backgroundColor = '#FEE2E2'; // Lighter Red
+                    e.target.style.transform = 'scale(1.02)';
+                    if (solutionItem) {
+                        solutionItem.style.backgroundColor = '#D1FAE5'; // Lighter Green
+                        solutionItem.style.transform = 'scale(1.02)';
+                    }
+                }
+            });
+
+            // 3. Roles
+            const roleTabsContainer = document.getElementById('role-tabs');
+            const roleContentContainer = document.getElementById('role-content');
+            rolesData.forEach((role, index) => {
+                const tab = document.createElement('button');
+                tab.className = 'px-4 py-2 text-sm font-medium rounded-md transition-colors duration-300 bg-gray-200 hover:bg-blue-500 hover:text-white';
+                tab.textContent = role.role;
+                tab.dataset.index = index;
+                roleTabsContainer.appendChild(tab);
+            });
+
+            roleTabsContainer.addEventListener('click', e => {
+                if (e.target.tagName === 'BUTTON') {
+                    const index = e.target.dataset.index;
+                    roleContentContainer.innerHTML = `<p class="text-center text-gray-700">${rolesData[index].desc}</p>`;
+                    
+                    roleTabsContainer.querySelectorAll('button').forEach(btn => {
+                        btn.classList.remove('bg-blue-600', 'text-white');
+                        btn.classList.add('bg-gray-200');
+                    });
+                    e.target.classList.add('bg-blue-600', 'text-white');
+                    e.target.classList.remove('bg-gray-200');
+                }
+            });
+            // Initial role content
+            roleContentContainer.innerHTML = `<p class="text-center text-gray-500">Başlamak için bir rol seçin.</p>`;
+
+            // 4. History Timeline and Chart
+            const timelineContainer = document.getElementById('timeline');
+            timelineData.forEach(item => {
+                const timelineItem = document.createElement('div');
+                timelineItem.className = 'timeline-item mb-10 ml-10';
+                timelineItem.innerHTML = `
+                    <div class="absolute -left-1.5 mt-1.5 w-3 h-3 bg-gray-300 rounded-full"></div>
+                    <time class="mb-1 text-sm font-normal leading-none text-gray-400">${item.year}</time>
+                    <h3 class="text-lg font-semibold text-gray-900">${item.event}</h3>
+                    <p class="text-base font-normal text-gray-500">${item.desc}</p>
+                `;
+                timelineContainer.appendChild(timelineItem);
+            });
+
+            const ctx = document.getElementById('historyChart').getContext('2d');
+            const historyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['First Gen', 'Second Gen', 'Third Gen', 'Modern Era'],
+                    datasets: [{
+                        label: 'Hakimiyet Dönemleri (Tahmini)',
+                        data: [20, 25, 20, 15], // Represents approximate duration/impact
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.5)',
+                            'rgba(54, 162, 235, 0.5)',
+                            'rgba(255, 206, 86, 0.5)',
+                            'rgba(75, 192, 192, 0.5)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Etki / Süre (Yıl)' }
+                        },
+                        x: {
+                            title: { display: true, text: 'DBMS Nesilleri' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true, text: 'DBMS Nesillerinin Gelişimi' }
+                    }
+                }
+            });
+
+            // 5. Accordions for Pros and Cons
+            const createAccordion = (containerId, data) => {
+                const container = document.getElementById(containerId);
+                data.forEach(item => {
+                    const accordionItem = document.createElement('div');
+                    accordionItem.className = 'bg-white rounded-md shadow-sm border border-gray-200';
+                    accordionItem.innerHTML = `
+                        <button class="w-full text-left p-4 font-medium flex justify-between items-center">
+                            <span>${item.title}</span>
+                            <svg class="w-5 h-5 shrink-0 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div class="p-4 pt-0 text-gray-600 hidden">
+                            ${item.content}
+                        </div>
+                    `;
+                    accordionItem.querySelector('button').addEventListener('click', (e) => {
+                        const content = e.currentTarget.nextElementSibling;
+                        const icon = e.currentTarget.querySelector('svg');
+                        content.classList.toggle('hidden');
+                        icon.classList.toggle('rotate-180');
+                    });
+                    container.appendChild(accordionItem);
+                });
+            };
+            createAccordion('advantages-accordion', prosConsData.advantages);
+            createAccordion('disadvantages-accordion', prosConsData.disadvantages);
+
+        });
+    </script>
+</body>
+</html>
